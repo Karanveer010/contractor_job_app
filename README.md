@@ -259,3 +259,66 @@ npm install react-native-uuid
 
 Used for displaying icons in the UI.
 npx expo install @expo/vector-icons
+
+Project Structure
+src
+│
+├── api
+│   └── axiosClient.ts              # Axios configuration and API interceptors
+│
+├── assets
+│   └── images
+│       ├── Button.png
+│       ├── cjm.png
+│       ├── hide.png
+│       └── show.png
+│
+├── components
+│   ├── CommonButton.tsx
+│   ├── CommonInput.tsx
+│   ├── CommonView.tsx
+│   ├── CustomHeader.tsx
+│   ├── DatePicker.tsx
+│   ├── JobCard.tsx
+│   ├── NetworkStatus.tsx
+│   ├── NoteTab.tsx
+│   ├── OverviewTab.tsx
+│   ├── SolidText.tsx
+│   └── Toast.tsx
+│
+├── database
+│   └── database.ts
+│
+├── redux
+│   ├── store.ts                    # Redux store configuration
+│   ├── userSlice.ts                # User authentication state
+│   └── jobSlice.ts                 # Jobs state management
+│
+├── navigation
+│   ├── AuthStack.tsx               # Authentication navigation stack
+│   ├── MainStack.tsx               # Main app navigation stack
+│   └── NavigationService.ts        # Navigation outside components
+│
+├── screens
+│   │
+│   ├── authScreen
+│   │   ├── CreateAccount.tsx
+│   │   ├── Login.tsx
+│   │   └── Welcome.tsx
+│   │
+│   ├── JobsListScreen.tsx
+│   ├── CreateJobScreen.tsx
+│   ├── EditJobScreen.tsx
+│   └── JobDetailScreen.tsx
+│
+├── services
+│   ├── authServices.ts
+│   ├── jobSync.tsx
+│   ├── jobUpdate.ts
+│   ├── networkService.ts
+│   └── syncService.ts
+│
+├── utils
+│   └── appUtils.tsx
+│
+└── App.tsx                         # Root component
