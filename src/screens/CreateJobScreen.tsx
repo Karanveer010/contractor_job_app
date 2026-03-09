@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Pressable,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 
 import uuid from "react-native-uuid";
@@ -16,72 +18,104 @@ import DatePicker from "../components/DatePicker";
 import AppUtils from "../appUtils";
 import { syncJobs } from "../services/syncService";
 import NetInfo from "@react-native-community/netinfo";
+import { updateJob } from "../services/jobUpdate";
+import { useSelector } from "react-redux";
 
-export default function CreateJobScreen({ navigation }: any) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [client, setClient] = useState("");
-  const [city, setCity] = useState("");
-  const [budget, setBudget] = useState("");
+export default function CreateJobScreen({ navigation, route }: any) {
+  const data = route?.params?.job;
+  const [title, setTitle] = useState(data?.title ? String(data?.title) : "");
+  const userId = useSelector((state: any) => state.userData.user._id);
+
+  const [description, setDescription] = useState(
+    data?.description ? String(data?.description) : "",
+  );
+  const [client, setClient] = useState(
+    data?.client ? String(data?.client) : "",
+  );
+  const [city, setCity] = useState(
+    data?.city || data?.location ? String(data?.city ?? data?.location) : "",
+  );
+  const [budget, setBudget] = useState(
+    data?.budget ? String(data?.budget) : "",
+  );
   const [date, setDate] = React.useState(new Date());
   const [showPicker, setShowPicker] = React.useState(false);
-  const [formatDate, setFormatDate] = useState("");
+  const [formatDate, setFormatDate] = useState(
+    data?.startDate ? String(data?.startDate) : "",
+  );
 
   const createJob = async () => {
     const network = await NetInfo.fetch();
 
-    if (!title.trim()) {
+    if (!title?.trim()) {
       AppUtils.showToast("Please enter job title");
       return;
     }
 
-    if (!description.trim()) {
+    if (!description?.trim()) {
       AppUtils.showToast("Please enter job description");
       return;
     }
 
-    if (!client.trim()) {
-      AppUtils.showToast("Please enter client name");
-      return;
-    }
+    // if (!client.trim()) {
+    //   AppUtils.showToast("Please enter client name");
+    //   return;
+    // }
 
-    if (!city.trim()) {
+    if (!city?.trim()) {
       AppUtils.showToast("Please enter city");
       return;
     }
 
-    if (!budget.trim()) {
+    if (!budget?.trim()) {
       AppUtils.showToast("Please enter budget");
       return;
     }
 
-    if (!formatDate) {
-      AppUtils.showToast("Please select start date");
-      return;
-    }
+    // if (!formatDate) {
+    //   AppUtils.showToast("Please select start date");
+    //   return;
+    // }
 
     const id = uuid?.v4();
 
     db?.runSync(
       `INSERT INTO jobs
-    (id,title,description,client,city,budget,startDate,syncStatus,updatedAt)
-    VALUES (?,?,?,?,?,?,?,?,?)`,
+    (id,userId,title,description,city,budget,syncStatus,updatedAt)
+    VALUES (?,?,?,?,?,?,?,?)`,
       [
         id,
+        userId,
         title,
         description,
-        client,
+        // client,
         city,
         budget,
-        formatDate,
+        // formatDate,
         "pending",
         Date.now(),
       ],
     );
 
     if (network?.isConnected) {
-      syncJobs();
+      await syncJobs();
     }
+
+    navigation.goBack();
+  };
+
+  const handleUpdate = async () => {
+    const job = {
+      _id: data?._id,
+      id: data?.clientJobId ?? data?.id,
+      title: title?.trim(),
+      description: description?.trim(),
+      city: city?.trim(),
+      budget: budget?.trim(),
+    };
+
+    await updateJob(job);
+
     navigation.goBack();
   };
 
@@ -100,83 +134,93 @@ export default function CreateJobScreen({ navigation }: any) {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <CustomHeader
-        title="Create New Job"
-        subtitle="Fill in the details below"
-      />
-      <View style={styles.card}>
-        <Text style={styles.label}>Job Title</Text>
-
-        <TextInput
-          placeholder="Job name"
-          style={styles.input}
-          value={title}
-          onChangeText={setTitle}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView style={styles.container}>
+        <CustomHeader
+          title={data ? "Edit Job" : "Create New Job"}
+          subtitle="Fill in the details below"
         />
+        <View style={styles.card}>
+          <Text style={styles.label}>Job Title</Text>
 
-        <Text style={styles.label}>Description</Text>
-
-        <TextInput
-          placeholder="Add job description..."
-          style={styles.input}
-          value={description}
-          onChangeText={setDescription}
-        />
-      </View>
-      <View style={styles.card}>
-        <Text style={styles.label}>Client Name</Text>
-
-        <TextInput
-          placeholder="Name"
-          style={styles.input}
-          value={client}
-          onChangeText={setClient}
-        />
-
-        <Text style={styles.label}>City</Text>
-
-        <TextInput
-          placeholder="City"
-          style={styles.input}
-          value={city}
-          onChangeText={setCity}
-        />
-      </View>
-      <View style={styles.card}>
-        <Text style={styles.label}>Budget</Text>
-
-        <TextInput
-          placeholder="$"
-          style={styles.input}
-          keyboardType={"numeric"}
-          value={budget}
-          onChangeText={setBudget}
-        />
-        <Text style={styles.label}>Start Date</Text>
-        <Pressable onPress={() => setShowPicker(true)}>
           <TextInput
-            placeholder="YYYY-MM-DD"
+            placeholder="Job name"
             style={styles.input}
-            value={String(formatDate)}
-            pointerEvents="none"
-            editable={false}
+            value={title}
+            onChangeText={setTitle}
           />
-        </Pressable>
-      </View>
 
-      <DatePicker
-        isVisible={showPicker}
-        mode="date"
-        selectedDate={date}
-        onConfirm={handleConfirm}
-        onCancel={() => setShowPicker(false)}
-      />
+          <Text style={styles.label}>Description</Text>
 
-      <TouchableOpacity style={styles.button} onPress={createJob}>
-        <Text style={styles.buttonText}>Create Job</Text>
-      </TouchableOpacity>
-    </ScrollView>
+          <TextInput
+            placeholder="Add job description..."
+            style={styles.input}
+            value={description}
+            onChangeText={setDescription}
+          />
+        </View>
+        <View style={styles.card}>
+          {/* <Text style={styles.label}>Client Name</Text>
+
+          <TextInput
+            placeholder="Name"
+            style={styles.input}
+            value={client}
+            onChangeText={setClient}
+          /> */}
+
+          <Text style={styles.label}>City</Text>
+
+          <TextInput
+            placeholder="City"
+            style={styles.input}
+            value={city}
+            onChangeText={setCity}
+          />
+        </View>
+        <View style={styles.card}>
+          <Text style={styles.label}>Budget</Text>
+
+          <TextInput
+            placeholder="$"
+            style={styles.input}
+            keyboardType={"numeric"}
+            value={budget}
+            onChangeText={setBudget}
+          />
+          {/* <Text style={styles.label}>Start Date</Text>
+          <Pressable onPress={() => setShowPicker(true)}>
+            <TextInput
+              placeholder="YYYY-MM-DD"
+              style={styles.input}
+              value={String(formatDate)}
+              pointerEvents="none"
+              editable={false}
+            />
+          </Pressable> */}
+        </View>
+
+        <DatePicker
+          isVisible={showPicker}
+          mode="date"
+          selectedDate={date}
+          onConfirm={handleConfirm}
+          onCancel={() => setShowPicker(false)}
+        />
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={data ? handleUpdate : createJob}
+        >
+          <Text style={styles.buttonText}>
+            {data ? "Update Job" : "Create Job"}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

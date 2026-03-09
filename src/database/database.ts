@@ -14,6 +14,12 @@ export const initDB = () => {
 
   // add new columns if missing
   try {
+    db.execSync(`ALTER TABLE jobs ADD COLUMN _id TEXT`);
+  } catch {}
+   try {
+    db.execSync(`ALTER TABLE jobs ADD COLUMN userId TEXT`);
+  } catch {}
+  try {
     db.execSync(`ALTER TABLE jobs ADD COLUMN client TEXT`);
   } catch {}
 

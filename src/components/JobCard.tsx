@@ -1,9 +1,17 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Pressable,
+} from "react-native";
 
 interface JobCardProps {
   job: any;
   onPress: () => void;
+  onpressEdit: () => void;
+  netInfo?: any;
 }
 
 const getStatusUI = (status: string) => {
@@ -16,27 +24,44 @@ const getStatusUI = (status: string) => {
   }
 
   if (status === "failed") {
-    return { text: "🔴 ailed", color: "#ef4444" };
+    return { text: "🔴 failed", color: "#ef4444" };
   }
 
   return { text: "", color: "#000" };
 };
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
 
-const JobCard: React.FC<JobCardProps> = ({ job, onPress }) => {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`;
+};
+
+const JobCard: React.FC<JobCardProps> = ({
+  job,
+  onPress,
+  onpressEdit,
+  netInfo = false,
+}) => {
   const status = getStatusUI(job?.syncStatus);
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       {/* Title + Status */}
       <View style={styles.rowBetween}>
         <Text style={styles.title}>{job?.title}</Text>
 
-        <View style={[styles.status, { backgroundColor: status.color }]}>
-          <Text style={styles.statusText}>{status.text}</Text>
-        </View>
+        {netInfo === false && (
+          <View style={[styles.status, { backgroundColor: status.color }]}>
+            <Text style={styles.statusText}>{status.text}</Text>
+          </View>
+        )}
       </View>
 
       {/* Client */}
-      <Text style={styles.subtitle}>{job?.client}</Text>
+      <Text style={styles.subtitle}>{job?.description ?? ""}</Text>
 
       {/* Budget + Location */}
       <View style={styles.infoRow}>
@@ -51,13 +76,18 @@ const JobCard: React.FC<JobCardProps> = ({ job, onPress }) => {
           <View style={styles.iconCircleGreen}>
             <Text>📍</Text>
           </View>
-          <Text style={styles.infoText}>{job?.city || "Location"}</Text>
+          <Text style={styles.infoText}>{job?.city || job?.location}</Text>
         </View>
+        <Pressable style={styles.edit} onPress={onpressEdit}>
+          <Text style={{ fontSize: 10 }}>Edit</Text>
+        </Pressable>
       </View>
 
       <View style={styles.divider} />
 
-      <Text style={styles.date}>Started {String(job?.startDate)}</Text>
+      {/* <Text style={styles.date}>
+        Started {job?.startDate || formatDate(job?.createdAt)}
+      </Text> */}
     </TouchableOpacity>
   );
 };
@@ -83,7 +113,13 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#1A1A1A",
   },
-
+  edit: {
+    backgroundColor: "#E8F1FF",
+    justifyContent: "center",
+    borderRadius: 10,
+    padding: 5,
+    alignItems: "center",
+  },
   subtitle: {
     color: "#7A7A7A",
     marginTop: 4,

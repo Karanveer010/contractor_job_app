@@ -11,6 +11,7 @@ import appUtils from "../../appUtils";
 import { signupApi } from "../../services/authServices";
 import { setAuth, setUser } from "../../redux/userData";
 import AppRoutes from "../../redux/navigation/RouteKeys/appRoutes";
+import appRoutes from "../../redux/navigation/RouteKeys/appRoutes";
 
 const CreateAccount: React.FC = () => {
   const dispatch = useDispatch();
@@ -47,8 +48,14 @@ const CreateAccount: React.FC = () => {
         if (res?.status === 200 || res?.ok) {
           dispatch(setUser(res?.data?.data ?? {}));
           dispatch(setAuth(true));
-          navigation.navigate(AppRoutes.NonAuthStack);
-          AppUtils?.showToast("Account created successfully", "green");
+          navigation.navigate(AppRoutes.Login, {
+            email: email?.toLowerCase()?.trim(),
+            password: confirmPassword?.trim(),
+          });
+          AppUtils?.showToast(
+            "Account created successfully please login",
+            "green",
+          );
         } else {
           AppUtils?.showToast("Failed to create account");
         }
@@ -120,7 +127,7 @@ const CreateAccount: React.FC = () => {
               {"Already have an account?"}{" "}
               <TouchableOpacity
                 onPress={() => {
-                  navigation.navigate("Login");
+                  navigation.navigate(appRoutes.Login);
                 }}
               >
                 <Text style={style.actionText}>"Sign In"</Text>

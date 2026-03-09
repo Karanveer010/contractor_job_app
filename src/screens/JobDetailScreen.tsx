@@ -1,75 +1,61 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-} from "react-native";
-
-import db from "../database/database";
-import uuid from "react-native-uuid";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import OverviewTab from "../components/Overviewtab";
+import NotesTab from "../components/NoteTab";
+import CustomHeader from "../components/Customheader";
+import { useSelector } from "react-redux";
+import api from "../api/axiosClient";
+import NetworkStatus from "../components/NetworkStatus";
 
 export default function JobDetailScreen({ route }: any) {
-  const { job } = route.params;
+  const jobData = route?.params?.job ?? {};
+  const [job, setJob] = useState(jobData ?? {});
+  const user = useSelector((state: any) => state.userData?.user);
+  const [tab, setTab] = useState("overview");
 
-  const [notes, setNotes] = useState([]);
-  const [note, setNote] = useState("");
+  const fetchJobs = async () => {
+    try {
+      const res = await api.get(`/job-details/${job?._id}`);
+      setJob(res.data.data ?? {});
+    } catch (error) {
+      console.log("API error", error);
+    }
+  };
 
   useEffect(() => {
-    loadNotes();
-  }, []);
-
-  const loadNotes = () => {
-    const data = db.getAllSync("SELECT * FROM notes WHERE jobId=?", [job.id]);
-
-    setNotes(data);
-  };
-
-  const addNote = () => {
-    db.runSync(
-      `INSERT INTO notes
-(id,jobId,content,syncStatus,updatedAt)
-VALUES (?,?,?,?,?)`,
-      [uuid.v4(), job.id, note, "pending", Date.now()],
-    );
-
-    setNote("");
-
-    loadNotes();
-  };
+    fetchJobs();
+    console.log("calling fetch details");
+  }, [jobData]);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{job.title}</Text>
+      <CustomHeader title={job?.title} subtitle={user?.name} />
 
-      <Text style={styles.description}>{job.description}</Text>
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, tab === "overview" && styles.activeTab]}
+          onPress={() => setTab("overview")}
+        >
+          <Text style={{ color: tab === "overview" ? "#FFFFFF" : "#000000" }}>
+            Overview
+          </Text>
+        </TouchableOpacity>
 
-      <View style={styles.card}>
-        <Text style={styles.section}>Notes</Text>
-
-        <TextInput
-          placeholder="Add note..."
-          style={styles.input}
-          value={note}
-          onChangeText={setNote}
-        />
-
-        <TouchableOpacity style={styles.button} onPress={addNote}>
-          <Text style={{ color: "#fff" }}>Add Note</Text>
+        <TouchableOpacity
+          style={[styles.tab, tab === "notes" && styles.activeTab]}
+          onPress={() => setTab("notes")}
+        >
+          <Text style={{ color: tab === "notes" ? "#FFFFFF" : "#000000" }}>
+            Notes
+          </Text>
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={notes}
-        keyExtractor={(item: any) => item.id}
-        renderItem={({ item }: any) => (
-          <View style={styles.noteCard}>
-            <Text>{item.content}</Text>
-          </View>
-        )}
-      />
+      {tab === "overview" && <OverviewTab job={job} />}
+
+      {tab === "notes" && <NotesTab job={job} />}
+
+      <NetworkStatus />
     </View>
   );
 }
@@ -78,49 +64,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    paddingTop: 50,
     backgroundColor: "#f2f4f7",
   },
 
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
+  tabContainer: {
+    flexDirection: "row",
+    marginVertical: 15,
   },
 
-  description: {
-    color: "#666",
-    marginBottom: 20,
-  },
-
-  card: {
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-
-  section: {
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-
-  input: {
-    backgroundColor: "#f1f3f6",
-    borderRadius: 10,
+  tab: {
     padding: 10,
-    marginBottom: 10,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 10,
+    marginRight: 10,
   },
 
-  button: {
-    backgroundColor: "#2563eb",
-    padding: 12,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-
-  noteCard: {
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
+  activeTab: {
+    backgroundColor: "#3b82f6",
+    color: "#FFFFFFF",
   },
 });

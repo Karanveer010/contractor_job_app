@@ -11,38 +11,66 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import db from "../database/database";
 import { useSelector } from "react-redux";
-import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import JobCard from "../components/JobCard";
 import NetworkStatus from "../components/NetworkStatus";
 import NetInfo from "@react-native-community/netinfo";
-import { getJobList } from "../services/authServices";
+import AppRoutes from "../redux/navigation/RouteKeys/appRoutes";
+import api from "../api/axiosClient";
+import { useIsFocused } from "@react-navigation/native";
+import { syncJobs } from "../services/syncService";
 
 export default function JobsListScreen({ navigation }: any) {
   const [jobs, setJobs] = useState([]);
   const [search, setSearch] = useState("");
   const user = useSelector((state: any) => state.userData.user);
-  const state: any = NetInfo.fetch();
-  useFocusEffect(
-    useCallback(() => {
-      loadJobs();
-    }, []),
-  );
+  const internet = useSelector((state: any) => state.userData.netInfo);
+  const focus = useIsFocused();
+
+  const filteredJobs = jobs?.filter((job: any) => {
+    const text = search?.toLowerCase();
+    return (
+      job?.title?.toLowerCase().includes(text) ||
+      job?.description?.toLowerCase().includes(text) ||
+      job?.location?.toLowerCase().includes(text)
+    );
+  });
+
+  const fetchJobs = async () => {
+    try {
+      const res = await api.get("/jobs");
+      setJobs(res.data.data ?? {});
+    } catch (error) {
+      console.log("API error", error);
+    }
+  };
+
+  useEffect(() => {
+    loadJobs();
+    syncJobs();
+  }, [focus, internet]);
+
   const loadJobs = async () => {
-    const data: any = db?.getAllSync("SELECT * FROM jobs");
-    setJobs(data);
-    // // if (state?.isConnected) {
-    // const res: any = await getJobList();
-    // const apiJobs = res?.data?.data || [];
-    // setJobs(apiJobs);
-    // console.log("working", apiJobs);
-    // }
+    const state = await NetInfo.fetch();
+
+    if (state?.isConnected) {
+      await fetchJobs();
+    } else {
+      const jobData: any = db.getAllSync("SELECT * FROM jobs WHERE userId=?", [
+        user?._id,
+      ]);
+      setJobs(jobData);
+    }
   };
 
   const renderJob = ({ item }: any) => {
     return (
       <JobCard
         job={item}
-        key={item?.id ?? item?.clientJobId}
+        key={item?.id ?? item?._id}
+        netInfo={internet}
+        onpressEdit={() =>
+          navigation.navigate(AppRoutes.CreateJob, { job: item })
+        }
         onPress={() => navigation.navigate("JobDetail", { job: item })}
       />
     );
@@ -75,17 +103,30 @@ export default function JobsListScreen({ navigation }: any) {
 
       {/* Job Title */}
       <View style={styles.rowBetween}>
-        <Text style={styles.sectionTitle}>Your Jobs ({jobs?.length})</Text>
+        <Text style={styles.sectionTitle}>
+          Your Jobs ({filteredJobs?.length})
+        </Text>
 
         <Text style={{ color: "#3b82f6" }}>View All</Text>
       </View>
 
       {/* Job List */}
       <FlatList
-        data={jobs}
-        keyExtractor={(item: any) => item.id}
+        data={filteredJobs}
+        keyExtractor={(item: any) =>
+          item?._id?.toString() ??
+          item?.id?.toString() ??
+          Math?.random()?.toString()
+        }
         renderItem={renderJob}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={() => {
+          return (
+            <Text style={{ textAlign: "center", alignSelf: "center" }}>
+              no jobs available
+            </Text>
+          );
+        }}
       />
       <NetworkStatus />
 

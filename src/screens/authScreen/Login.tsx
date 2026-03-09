@@ -11,14 +11,17 @@ import AppUtils from "../../appUtils";
 import { loginApi } from "../../services/authServices";
 import { setAuth, setToken, setUser } from "../../redux/userData";
 import * as SecureStore from "expo-secure-store";
-const login: React.FC = () => {
+const login: React.FC = ({ route }: any) => {
   const dispatch = useDispatch();
   const navigation: any = useNavigation();
-  const [email, setEmail] = useState<string>("");
+  const routeEmail = route?.params?.email ?? "";
+  const routePassword = route?.params?.password ?? "";
+
+  const [email, setEmail] = useState<string>(routeEmail ?? "");
   const [eyeOpen, setEyeOpen] = useState<boolean>(true);
   const [load, setLoad] = useState<boolean>(false);
 
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>(routePassword??"");
 
   const login = () => {
     if (!email || !confirmPassword) {
@@ -44,19 +47,17 @@ const login: React.FC = () => {
     loginApi(body)
       .then(async (res: any) => {
         if (res?.status === 200 || res?.ok) {
-          console.log(res.data.data);
           await SecureStore.setItemAsync("token", res?.data?.data?.token);
           await dispatch(setToken(res?.data?.data?.token ?? ""));
           dispatch(setUser(res?.data?.data ?? {}));
           dispatch(setAuth(true));
-          navigation.navigate(AppRoutes.NonAuthStack);
+          navigation.replace(AppRoutes.NonAuthStack);
         } else {
           AppUtils?.showToast("Failed to create account");
           setLoad(false);
         }
       })
       .catch((error: any) => {
-        console.log("Signup Error:", error);
         if (error?.response) {
           const message = error?.response?.data?.message || "Server error";
           AppUtils?.showToast(message);

@@ -5,6 +5,7 @@ export const userDataSlice = createSlice({
     auth: false,
     token: "",
     user: {},
+    netInfo: false,
   },
   reducers: {
     setAuth: (state, action) => {
@@ -16,8 +17,11 @@ export const userDataSlice = createSlice({
     setToken: (state, action) => {
       state.token = action.payload;
     },
+    setNetInfO: (state, action) => {
+      state.netInfo = action.payload;
+    },
   },
 });
-export const { setAuth, setUser, setToken } = userDataSlice.actions;
+export const { setAuth, setUser, setToken, setNetInfO } = userDataSlice.actions;
 
 export default userDataSlice.reducer;

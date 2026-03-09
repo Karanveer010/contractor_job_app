@@ -9,15 +9,36 @@ export const syncJobs = async () => {
 
     for (const job of jobs) {
       try {
-        await api.post("/jobs", {
-          clientJobId: job.id,
-          title: job.title,
-          description: job.description,
-          // client: job.client,
-          location: job.city,
-          budget: job.budget,
-          // startDate: job.startDate
-        });
+        let res;
+
+        console.log("Syncing job:", job._id);
+
+        // if job already exists on server → UPDATE
+        if (job?._id) {
+          res = await api.put(`/jobs/${job?._id}`, {
+            clientJobId: job.id,
+            title: job.title,
+            description: job.description,
+            location: job.city,
+            budget: Number(job.budget),
+          });
+        } else {
+          // new job → CREATE
+          res = await api.post("/jobs", {
+            clientJobId: job.id,
+            title: job.title,
+            description: job.description,
+            location: job.city,
+            budget: Number(job.budget),
+          });
+
+          // save server id after create
+          const serverId = res?.data?.data?._id;
+
+          if (serverId) {
+            db.runSync("UPDATE jobs SET _id=? WHERE id=?", [serverId, job.id]);
+          }
+        }
 
         db.runSync(
           "UPDATE jobs SET syncStatus='synced', updatedAt=? WHERE id=?",
@@ -25,6 +46,7 @@ export const syncJobs = async () => {
         );
       } catch (error) {
         console.log("Job sync failed:", job.id);
+
         db.runSync("UPDATE jobs SET syncStatus='failed' WHERE id=?", [job.id]);
       }
     }
