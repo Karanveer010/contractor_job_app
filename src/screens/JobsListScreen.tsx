@@ -6,11 +6,12 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
+  Pressable,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
 import db from "../database/database";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import JobCard from "../components/JobCard";
 import NetworkStatus from "../components/NetworkStatus";
 import NetInfo from "@react-native-community/netinfo";
@@ -18,6 +19,10 @@ import AppRoutes from "../redux/navigation/RouteKeys/appRoutes";
 import api from "../api/axiosClient";
 import { useIsFocused } from "@react-navigation/native";
 import { syncJobs } from "../services/syncService";
+import { setAuth, setUser } from "../redux/userData";
+import { setToken } from "../redux/userData";
+import * as SecureStore from "expo-secure-store";
+import AppUtils from "../appUtils";
 
 export default function JobsListScreen({ navigation }: any) {
   const [jobs, setJobs] = useState([]);
@@ -25,6 +30,7 @@ export default function JobsListScreen({ navigation }: any) {
   const user = useSelector((state: any) => state.userData.user);
   const internet = useSelector((state: any) => state.userData.netInfo);
   const focus = useIsFocused();
+  const dispatch = useDispatch();
 
   const filteredJobs = jobs?.filter((job: any) => {
     const text = search?.toLowerCase();
@@ -39,6 +45,32 @@ export default function JobsListScreen({ navigation }: any) {
     try {
       const res = await api.get("/jobs");
       setJobs(res.data.data ?? {});
+    } catch (error) {
+      console.log("API error", error);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      const res: any = await api.post("/auth/logout");
+      if (res?.success ?? res.status === 200) {
+        dispatch(setUser({}));
+        dispatch(setToken(""));
+        dispatch(setAuth(false));
+        AppUtils.showToast(res.data.message);
+        await SecureStore.deleteItemAsync("token");
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "AuthStack",
+              state: {
+                routes: [{ name: AppRoutes.Login }],
+              },
+            },
+          ],
+        });
+      }
     } catch (error) {
       console.log("API error", error);
     }
@@ -88,6 +120,25 @@ export default function JobsListScreen({ navigation }: any) {
         <View style={styles.avatar}>
           <Text style={{ color: "#fff" }}>{user?.name?.charAt(0)}</Text>
         </View>
+
+        <Pressable
+          onPress={logout}
+          style={{
+            height: 40,
+            width: 40,
+            borderRadius: 20,
+            justifyContent: "center",
+            alingItems: "center",
+            backgroundColor: "red",
+          }}
+        >
+          <Ionicons
+            name="log-out"
+            size={25}
+            color="white"
+            style={{ alingSelf: "center" }}
+          />
+        </Pressable>
       </View>
 
       {/* Search */}

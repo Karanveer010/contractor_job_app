@@ -21,7 +21,9 @@ const login: React.FC = ({ route }: any) => {
   const [eyeOpen, setEyeOpen] = useState<boolean>(true);
   const [load, setLoad] = useState<boolean>(false);
 
-  const [confirmPassword, setConfirmPassword] = useState<string>(routePassword??"");
+  const [confirmPassword, setConfirmPassword] = useState<string>(
+    routePassword ?? "",
+  );
 
   const login = () => {
     if (!email || !confirmPassword) {
