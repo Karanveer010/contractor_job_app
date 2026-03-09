@@ -16,7 +16,7 @@ import { useIsFocused } from "@react-navigation/native";
 export default function NotesTab({ job }: any) {
   const [jobData, setJob] = useState(job ?? {});
   const [note, setNote] = useState("");
-  const [notes, setNotes] = useState(job?.notes ?? []);
+  const [notes, setNotes] = useState(jobData?.notes ?? []);
   const [noteId, setNoteId] = useState("");
   const [editingNoteId, setEditingNoteId] = useState(null);
   const focus = useIsFocused();
@@ -32,7 +32,7 @@ export default function NotesTab({ job }: any) {
 
   useEffect(() => {
     fetchJobs();
-  }, [focus]);
+  }, [focus, jobData]);
 
   const addOrUpdateNote = async () => {
     if (!note.trim()) return;
@@ -46,11 +46,12 @@ export default function NotesTab({ job }: any) {
       setNotes(updated);
 
       try {
-      const res :any=  await updateNoteApi(jobData?._id, noteId, {
+        const res: any = await updateNoteApi(jobData?._id, noteId, {
           text: note,
         });
-         if (res.status == 201) {
+        if (res.status == 200) {
           AppUtils.showToast(res.data.message, "green");
+          fetchJobs();
         } else {
           AppUtils.showToast(res.data.message);
         }
@@ -77,6 +78,7 @@ export default function NotesTab({ job }: any) {
         });
         if (res.status == 201) {
           AppUtils.showToast(res.data.message, "green");
+          fetchJobs();
         } else {
           AppUtils.showToast(res.data.message);
         }
@@ -120,7 +122,7 @@ export default function NotesTab({ job }: any) {
       </TouchableOpacity>
 
       <FlatList
-        data={notes}
+        data={jobData?.notes}
         keyExtractor={(item: any) =>
           item?.id?.toString() ?? item?._id?.toString()
         }
