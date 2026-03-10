@@ -13,9 +13,9 @@ export default function AppNavigator() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
+    const unsubscribe = NetInfo?.addEventListener((state) => {
       dispatch(setNetInfO(state.isConnected ?? false));
-      if (state.isConnected) {
+      if (state?.isConnected) {
         syncJobs();
       }
     });

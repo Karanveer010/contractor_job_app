@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Provider, useDispatch } from "react-redux";
+import { Provider } from "react-redux";
 import { persistor, store } from "./src/redux/store";
 import AppNavigator from "./src/redux/navigation/AppNavigator";
 import { initDB } from "./src/database/database";

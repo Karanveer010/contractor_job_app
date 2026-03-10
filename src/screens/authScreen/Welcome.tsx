@@ -8,15 +8,15 @@ import { Image } from "expo-image";
 import CommonButton from "../../components/CommonButton";
 
 const Welcome = ({}: any) => {
-  const auth = useSelector((state: any) => state.userData.auth);
+  // const auth = useSelector((state: any) => state.userData.auth);
   const { colors, images } = useTheme() as any;
   const navigation: any = useNavigation();
 
-  useEffect(() => {
-    if (auth) {
-      navigation.navigate(AppRoutes.NonAuthStack);
-    }
-  }, [auth]);
+  // useEffect(() => {
+  //   if (auth) {
+  //     navigation.navigate(AppRoutes?.NonAuthStack);
+  //   }
+  // }, [auth]);
 
   return (
     <LinearGradient

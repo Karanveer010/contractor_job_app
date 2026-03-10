@@ -3,15 +3,13 @@ import api from "../api/axiosClient";
 
 export const syncJobs = async () => {
   try {
-    const jobs: any = db.getAllSync(
+    const jobs: any = await db?.getAllSync(
       "SELECT * FROM jobs WHERE syncStatus='pending' OR syncStatus='failed'",
     );
 
     for (const job of jobs) {
       try {
         let res;
-
-        console.log("Syncing job:", job._id);
 
         // if job already exists on server → UPDATE
         if (job?._id) {
@@ -36,7 +34,7 @@ export const syncJobs = async () => {
           const serverId = res?.data?.data?._id;
 
           if (serverId) {
-            db.runSync("UPDATE jobs SET _id=? WHERE id=?", [serverId, job.id]);
+         await   db.runSync("UPDATE jobs SET _id=? WHERE id=?", [serverId, job.id]);
           }
         }
 
@@ -45,7 +43,6 @@ export const syncJobs = async () => {
           [Date.now(), job.id],
         );
       } catch (error) {
-        console.log("Job sync failed:", job.id);
 
         db.runSync("UPDATE jobs SET syncStatus='failed' WHERE id=?", [job.id]);
       }

@@ -11,7 +11,7 @@ import AppUtils from "../../appUtils";
 import { loginApi } from "../../services/authServices";
 import { setAuth, setToken, setUser } from "../../redux/userData";
 import * as SecureStore from "expo-secure-store";
-const login: React.FC = ({ route }: any) => {
+const Login: React.FC = ({ route }: any) => {
   const dispatch = useDispatch();
   const navigation: any = useNavigation();
   const routeEmail = route?.params?.email ?? "";
@@ -171,4 +171,4 @@ const style = StyleSheet.create({
     textAlign: "center",
   },
 });
-export default login;
+export default Login;
