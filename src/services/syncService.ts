@@ -13,7 +13,7 @@ export const syncJobs = async () => {
 
         // if job already exists on server → UPDATE
         if (job?._id) {
-          res = await api.put(`/jobs/${job?._id}`, {
+          res = await api?.put(`/jobs/${job?._id}`, {
             clientJobId: job.id,
             title: job.title,
             description: job.description,
@@ -22,7 +22,7 @@ export const syncJobs = async () => {
           });
         } else {
           // new job → CREATE
-          res = await api.post("/jobs", {
+          res = await api?.post("/jobs", {
             clientJobId: job.id,
             title: job.title,
             description: job.description,

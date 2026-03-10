@@ -12,11 +12,11 @@ const Welcome = ({}: any) => {
   const auth = useSelector((state: any) => state.userData.auth);
   const navigation: any = useNavigation();
 
-  useEffect(() => {
-    if (auth) {
-      navigation?.navigate(AppRoutes?.NonAuthStack);
-    }
-  }, [auth]);
+  // useEffect(() => {
+  //   if (auth) {
+  //     navigation?.navigate(AppRoutes?.NonAuthStack);
+  //   }
+  // }, [auth]);
 
   return (
   

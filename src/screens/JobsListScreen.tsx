@@ -31,7 +31,7 @@ export default function JobsListScreen({ navigation }: any) {
   const internet = useSelector((state: any) => state.userData.netInfo);
   const focus = useIsFocused();
   const dispatch = useDispatch();
-
+  
   const filteredJobs = jobs?.filter((job: any) => {
     const text = search?.toLowerCase();
     return (
@@ -44,41 +44,62 @@ export default function JobsListScreen({ navigation }: any) {
   const fetchJobs = async () => {
     try {
       const res = await api.get("/jobs");
-      setJobs(res.data.data ?? {});
+      setJobs(res.data.data ?? []);
     } catch (error) {
       console.log("API error", error);
     }
   };
 
+ 
   const logout = async () => {
-    try {
-      const res: any = await api.post("/auth/logout");
-      if (res?.success ?? res.status === 200) {
-       await dispatch(setUser({}));
-      await  dispatch(setToken(""));
-       await dispatch(setAuth(false));
-        AppUtils.showToast(res.data.message);
-        await SecureStore.deleteItemAsync("token");
-        navigation.reset({
-          index: 0,
-          routes: [
-            {
-              name: "AuthStack",
-              state: {
-                routes:[ { name: AppRoutes.Login,params: { from: "JobList" } }],
-              },
+  try {
+    const res = await api.post("/auth/logout");
+    if (res?.status === 200) {
+       AppUtils.showToast(res?.data?.message,"green");
+       navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: "AuthStack",
+            state: {
+              routes: [
+                {
+                  name: AppRoutes.Login,
+                  params: { from: "JobList" },
+                },
+              ],
             },
-          ],
-        });
-      }
-    } catch (error) {
-      console.log("API error", error);
+          },
+        ],
+      });
+      await dispatch(setUser({}));
+      await dispatch(setToken(""));
+      await dispatch(setAuth(false));
+      await SecureStore.deleteItemAsync("token");
     }
-  };
+  } catch (error:any) {
+    console.log("Logout API ERROR:", error?.response?.data);
+     await dispatch(setToken(""));
+    await SecureStore.deleteItemAsync("token");
+  navigation.reset({
+    index: 0,
+    routes: [
+      {
+        name: "AuthStack",
+        state: {
+          routes: [{ name: AppRoutes.Login , params: { from: "JobList" }}],
+        },
+      },
+    ],
+  });
+  }
+};
 
   useEffect(() => {
-    loadJobs();
+
+ loadJobs();
     syncJobs();
+   
   }, [focus, internet]);
 
   const loadJobs = async () => {
@@ -128,7 +149,6 @@ export default function JobsListScreen({ navigation }: any) {
             width: 40,
             borderRadius: 20,
             justifyContent: "center",
-            alingItems: "center",
             backgroundColor: "red",
           }}
         >

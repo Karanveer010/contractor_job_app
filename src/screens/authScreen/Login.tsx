@@ -18,7 +18,6 @@ const Login: React.FC = ({ route }: any) => {
   const routeEmail = route?.params?.email ?? "";
   const routePassword = route?.params?.password ?? "";
   const whichScreen=route?.params?.from ?? "";
-
   const [email, setEmail] = useState<string>(routeEmail ?? "");
   const [eyeOpen, setEyeOpen] = useState<boolean>(true);
   const [load, setLoad] = useState<boolean>(false);
@@ -50,11 +49,14 @@ const Login: React.FC = ({ route }: any) => {
 
     loginApi(body)
       .then(async (res: any) => {
-        if (res?.status === 200 || res?.ok) {
-          await SecureStore.setItemAsync("token", res?.data?.data?.token);
-          await dispatch(setToken(res?.data?.data?.token ?? ""));
+        if (res?.status === 200 || res?.ok) {  
+          const token = res?.data?.data?.token;
+          await dispatch(setToken(token ?? ""));
           await dispatch(setUser(res?.data?.data ?? {}));
          await dispatch(setAuth(true));
+          if (token) {
+        await SecureStore.setItemAsync("token", token);
+      }
           navigation.replace(AppRoutes.NonAuthStack);
         } else {
           AppUtils?.showToast("Failed to create account");
@@ -79,7 +81,7 @@ const Login: React.FC = ({ route }: any) => {
     <CommonView
       view={
         <View style={style.parent}>
-          <CustomHeader title="Welcome Back" subtitle="Sign in to continue" onBackPress={()=>{whichScreen == "JobList" ? navigate(AppRoutes.AuthStack) : navigation?.goBack()}} />
+          <CustomHeader title="Welcome Back" subtitle="Sign in to continue" onBackPress={()=>{whichScreen == "JobList" ? navigate(AppRoutes.Welcome) : navigation?.goBack()}} />
           <View
             style={{ width: "100%", justifyContent: "center", marginTop: 20 }}
           >

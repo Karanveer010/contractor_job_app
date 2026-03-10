@@ -2,39 +2,39 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { navigate } from "../redux/navigation/navigationService";
 import AppRoutes from "../redux/navigation/RouteKeys/appRoutes";
+import { store } from "../redux/store";
 
 const api = axios.create({
   baseURL: "https://sandbox-job-app.bosselt.com/api/v1",
   timeout: 20000,
 });
 
-api?.interceptors?.request?.use(async (config) => {
-  try {
-    const token = await SecureStore?.getItemAsync("token");
+api.interceptors.request.use(async (config) => {
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  const reduxToken = store.getState()?.userData?.token;
+    const secureToken = await SecureStore.getItemAsync("token");
 
-    return config;
-  } catch (error) {
-    console.log("SecureStore error", error);
-    return config;
+    const token = typeof reduxToken === "string" ? reduxToken : secureToken;
+
+  if (token) {
+    config.headers = {
+      ...config.headers,
+      Authorization: token, 
+    };
   }
+
+  return config;
 });
 
 api.interceptors.response.use(
   (response) => response,
-
   async (error) => {
-    if (error.response?.status === 401) {
+    if (error?.response?.status === 401) {
       await SecureStore.deleteItemAsync("token");
-      navigate(AppRoutes?.Login);
-      console.log("Unauthorized → Redirect to login");
+      navigate(AppRoutes.Login);
     }
-
     return Promise.reject(error);
-  },
+  }
 );
 
 export default api;
