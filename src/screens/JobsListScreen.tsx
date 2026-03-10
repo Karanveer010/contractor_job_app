@@ -54,9 +54,9 @@ export default function JobsListScreen({ navigation }: any) {
     try {
       const res: any = await api.post("/auth/logout");
       if (res?.success ?? res.status === 200) {
-        dispatch(setUser({}));
-        dispatch(setToken(""));
-        dispatch(setAuth(false));
+       await dispatch(setUser({}));
+      await  dispatch(setToken(""));
+       await dispatch(setAuth(false));
         AppUtils.showToast(res.data.message);
         await SecureStore.deleteItemAsync("token");
         navigation.reset({

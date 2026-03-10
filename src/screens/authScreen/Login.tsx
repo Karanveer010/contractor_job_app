@@ -51,8 +51,8 @@ const Login: React.FC = ({ route }: any) => {
         if (res?.status === 200 || res?.ok) {
           await SecureStore.setItemAsync("token", res?.data?.data?.token);
           await dispatch(setToken(res?.data?.data?.token ?? ""));
-          dispatch(setUser(res?.data?.data ?? {}));
-          dispatch(setAuth(true));
+          await dispatch(setUser(res?.data?.data ?? {}));
+         await dispatch(setAuth(true));
           navigation.replace(AppRoutes.NonAuthStack);
         } else {
           AppUtils?.showToast("Failed to create account");
