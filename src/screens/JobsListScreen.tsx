@@ -65,7 +65,7 @@ export default function JobsListScreen({ navigation }: any) {
             {
               name: "AuthStack",
               state: {
-                routes: [{ name: AppRoutes.Login }],
+                routes:[ { name: AppRoutes.Login,params: { from: "JobList" } }],
               },
             },
           ],

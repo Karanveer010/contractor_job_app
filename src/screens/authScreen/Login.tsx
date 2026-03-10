@@ -11,11 +11,13 @@ import AppUtils from "../../appUtils";
 import { loginApi } from "../../services/authServices";
 import { setAuth, setToken, setUser } from "../../redux/userData";
 import * as SecureStore from "expo-secure-store";
+import { navigate } from "../../redux/navigation/navigationService";
 const Login: React.FC = ({ route }: any) => {
   const dispatch = useDispatch();
   const navigation: any = useNavigation();
   const routeEmail = route?.params?.email ?? "";
   const routePassword = route?.params?.password ?? "";
+  const whichScreen=route?.params?.from ?? "";
 
   const [email, setEmail] = useState<string>(routeEmail ?? "");
   const [eyeOpen, setEyeOpen] = useState<boolean>(true);
@@ -77,7 +79,7 @@ const Login: React.FC = ({ route }: any) => {
     <CommonView
       view={
         <View style={style.parent}>
-          <CustomHeader title="Welcome Back" subtitle="Sign in to continue" />
+          <CustomHeader title="Welcome Back" subtitle="Sign in to continue" onBackPress={()=>{whichScreen == "JobList" ? navigate(AppRoutes.AuthStack) : navigation?.goBack()}} />
           <View
             style={{ width: "100%", justifyContent: "center", marginTop: 20 }}
           >

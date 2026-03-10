@@ -16,7 +16,7 @@ const CustomHeader = ({ title, subtitle, onBackPress }: Props) => {
     if (onBackPress) {
       onBackPress();
     } else {
-      navigation.goBack();
+      navigation?.goBack();
     }
   };
 
