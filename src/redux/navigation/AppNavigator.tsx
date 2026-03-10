@@ -23,9 +23,12 @@ export default function AppNavigator() {
     return () => unsubscribe();
   }, []);
   return (
+    
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+     
       <Stack.Screen name={"AuthStack"} component={AuthStack} />
       <Stack.Screen name={"NonAuthStack"} component={NonAuthStack} />
     </Stack.Navigator>
+    
   );
 }

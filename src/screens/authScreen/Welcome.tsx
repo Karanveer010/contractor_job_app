@@ -1,28 +1,30 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
-import { useNavigation, useTheme } from "@react-navigation/native";
+
+import { useNavigation } from "@react-navigation/native";
 import AppRoutes from "../../redux/navigation/RouteKeys/appRoutes";
 import { Image } from "expo-image";
 import CommonButton from "../../components/CommonButton";
+import { useSelector } from "react-redux";
 
 const Welcome = ({}: any) => {
-  // const auth = useSelector((state: any) => state.userData.auth);
-  const { colors, images } = useTheme() as any;
+  const auth = useSelector((state: any) => state.userData.auth);
   const navigation: any = useNavigation();
 
-  // useEffect(() => {
-  //   if (auth) {
-  //     navigation.navigate(AppRoutes?.NonAuthStack);
-  //   }
-  // }, [auth]);
+  useEffect(() => {
+    if (auth) {
+      navigation?.navigate(AppRoutes?.NonAuthStack);
+    }
+  }, [auth]);
 
   return (
+  
     <LinearGradient
       colors={["#0F1B2D", "#10233F", "#0B1A2A"]}
       style={styles.container}
     >
+         <StatusBar barStyle={"light-content"} />
       <View style={styles.centerContainer}>
         <Image
           source={require("../../assets/cjm.png")}

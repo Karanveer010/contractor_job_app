@@ -2,6 +2,7 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { navigate } from "../redux/navigation/navigationService";
 import AppRoutes from "../redux/navigation/RouteKeys/appRoutes";
+
 const api = axios.create({
   baseURL: "https://sandbox-job-app.bosselt.com/api/v1",
   timeout: 20000,

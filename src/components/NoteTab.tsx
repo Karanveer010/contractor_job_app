@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import { addNoteApi, updateNoteApi } from "../services/authServices";
 import AppUtils from "../appUtils";
-import uuid from "react-native-uuid";
 import api from "../api/axiosClient";
 import { useIsFocused } from "@react-navigation/native";
+import uuid from "react-native-uuid";
 
 export default function NotesTab({ job }: any) {
   const [jobData, setJob] = useState(job ?? {});
@@ -64,7 +64,8 @@ export default function NotesTab({ job }: any) {
 
     // ADD NOTE
     else {
-      const newNoteId: any = uuid.v4();
+      const id = uuid?.v4();
+      const newNoteId: any = id;
       const newNote: any = {
         id: jobData?._id,
         clientNoteId: newNoteId,

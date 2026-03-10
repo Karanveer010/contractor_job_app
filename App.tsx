@@ -5,7 +5,6 @@ import AppNavigator from "./src/redux/navigation/AppNavigator";
 import { initDB } from "./src/database/database";
 import { listenNetwork } from "./src/services/networkService";
 import { syncJobs } from "./src/services/syncService";
-import { StatusBar, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { PersistGate } from "redux-persist/lib/integration/react";
@@ -21,17 +20,19 @@ export default function App() {
   }, []);
 
   return (
+     
     <SafeAreaProvider>
-      <StatusBar style="auto" />
+    
+  <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
       <NavigationContainer ref={navigationRef}>
-        <PersistGate loading={null} persistor={persistor}>
-          <Provider store={store}>
-            <ToastProvider>
-              <AppNavigator />
-            </ToastProvider>
-          </Provider>
-        </PersistGate>
+        
+        <ToastProvider>
+          <AppNavigator />
+        </ToastProvider>
       </NavigationContainer>
-    </SafeAreaProvider>
+    </PersistGate>
+  </Provider>
+</SafeAreaProvider>
   );
 }

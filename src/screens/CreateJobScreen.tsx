@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Pressable,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
